@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char *argv[]) {
     pid_t pid;
     pid = fork();
 
@@ -16,7 +16,7 @@ int main() {
         return 1;
     }
     else if(pid == 0) {
-        execl("/media/sf_CS4440/Project 1/MyCompress", "./MyCompress", "test.txt", "compressed.txt", NULL);
+        execl("/media/sf_CS4440/Project 1/MyCompress", "MyCompress", argv[1], argv[2], NULL);
     }
     else {
         wait(NULL);

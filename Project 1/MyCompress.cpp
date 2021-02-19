@@ -7,20 +7,27 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     string fileInput;
-    cout << "Please type what input file you want to open. \n";
-    cin >> fileInput;
-    ifstream infile(argv[1]);
+    ifstream infile;
+    string fileOutput;
+    ofstream outfile;
+
+    if(argc > 2) {
+        infile.open(argv[1]);
+        outfile.open(argv[2]);
+    }
+    else {
+        cout << "Please type what input file you want to open. \n";
+        cin >> fileInput;
+        cout << "Please type what output file you want to open. \n";
+        cin >> fileOutput;
+        infile.open(fileInput);
+        outfile.open(fileOutput);
+    }
 
     if(!infile.good()) {
         cout << "FILE NOT FOUND \n";
         return 0;
     }
-
-    string fileOutput;
-    ofstream outfile;
-    cout << "Please type what output file you want to open. \n";
-    cin >> fileOutput;
-    outfile.open(argv[2]);
 
     char c;
     int counter = 0;
