@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     string fileInput;
     cout << "Please type what input file you want to open. \n";
     cin >> fileInput;
-    ifstream infile(argv[0]);
+    ifstream infile(argv[1]);
 
     if(!infile.good()) {
         cout << "FILE NOT FOUND \n";
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     ofstream outfile;
     cout << "Please type what output file you want to open. \n";
     cin >> fileOutput;
-    outfile.open(argv[1]);
+    outfile.open(argv[2]);
 
     char c;
     int counter = 0;

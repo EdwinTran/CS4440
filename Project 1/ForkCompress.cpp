@@ -16,14 +16,7 @@ int main() {
         return 1;
     }
     else if(pid == 0) {
-        string fileInput;
-        cout << "Enter Input file";
-        cin >> fileInput;
-        string fileOutput;
-        cout << "Enter output file";
-        cin >> fileOutput;
-
-        execl("./MyCompress", "./MyCompress", fileInput, fileOutput, NULL);
+        execl("/media/sf_CS4440/Project 1/MyCompress", "./MyCompress", "test.txt", "compressed.txt", NULL);
     }
     else {
         wait(NULL);
