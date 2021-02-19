@@ -13,7 +13,7 @@ int main() {
 
     if(!infile.good()) {
         cout << "FILE NOT FOUND \n";
-        exit(0);
+        return 0;
     }
 
     string fileOutput;
@@ -54,5 +54,5 @@ int main() {
 
     infile.close();
     outfile.close();
-    return 0;
+    return 1;
 }
