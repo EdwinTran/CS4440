@@ -5,6 +5,24 @@
 
 using namespace std;
 
+void compress(ofstream& outfile,char lastChar, int counter) {
+    if(counter >= 16) {
+        if(lastChar == '1') {
+            string compressedVer = "+" + to_string(counter) + "+";
+            outfile << compressedVer;
+        }
+        else {
+            string compressedVer = "-" + to_string(counter) + "-";
+            outfile << compressedVer;
+        }
+    }
+    else {
+        for(int i = 0; i < counter; i++) {
+            outfile << lastChar;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     string fileInput;
     ifstream infile;
@@ -20,6 +38,7 @@ int main(int argc, char *argv[]) {
         cin >> fileInput;
         cout << "Please type what output file you want to open. \n";
         cin >> fileOutput;
+        
         infile.open(fileInput);
         outfile.open(fileOutput);
     }
@@ -37,21 +56,7 @@ int main(int argc, char *argv[]) {
         infile.get(c);
 
         if(c != lastChar) {
-            if(counter >= 16) {
-                if(lastChar == '1') {
-                    string compressedVer = "+" + to_string(counter) + "+";
-                    outfile << compressedVer;
-                }
-                else {
-                    string compressedVer = "-" + to_string(counter) + "-";
-                    outfile << compressedVer;
-                }
-            }
-            else {
-                for(int i = 0; i < counter; i++) {
-                    outfile << lastChar;
-                }
-            }
+            compress(outfile, lastChar, counter);
             counter = 0;
         }
 
