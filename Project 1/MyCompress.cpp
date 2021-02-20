@@ -34,13 +34,8 @@ int main(int argc, char *argv[]) {
         outfile.open(argv[2]);
     }
     else {
-        cout << "Please type what input file you want to open. \n";
-        cin >> fileInput;
-        cout << "Please type what output file you want to open. \n";
-        cin >> fileOutput;
-        
-        infile.open(fileInput);
-        outfile.open(fileOutput);
+        cout << "ERROR: INPUT SOURCE AND DESTINATION FILES\n";
+        return 0;
     }
 
     if(!infile.good()) {

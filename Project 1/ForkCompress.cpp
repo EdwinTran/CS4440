@@ -1,9 +1,6 @@
 #include <sys/wait.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <iostream>
-#include <fstream>
-#include <string.h>
 
 using namespace std;
 
