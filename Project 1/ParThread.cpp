@@ -14,40 +14,16 @@
 #include <stdlib.h>
 
 using namespace std;
-
+//Global string is created which will allow access to all functions.
 string binarystring = "";
-vector<int>finallist;
-
+//A struct is used in order to pass 2 integers into the thread argument;
 struct boundary
 {
     int start;
     int end;
 };
-
-
-string compress(int counter, char lastChar) {
-    
-    if(counter >= 16) {
-        if(lastChar == '1') {
-            string compressedVer = "+" + to_string(counter) + "+";
-            return compressedVer;
-        }
-        else {
-            string compressedVer = "-" + to_string(counter) + "-";
-            return compressedVer;
-        }
-    }
-   else {
-       string tempstring = "";
-        for(int i = 0; i < counter; i++) {
-            tempstring.push_back(lastChar);
-        }
-        return tempstring;
-    }
-    return "it closed";
-}
-
-void * reader(void *arg){
+//This function will create the chunk of the file and compress it. The compressed string will then be returned.
+void * compressor(void *arg){
 
     struct boundary tempbounds = *((struct boundary *)arg);
     int startingp = tempbounds.start;
@@ -58,14 +34,30 @@ void * reader(void *arg){
     string finalstring = "";
     vector<string> vstring;
     
-
+    //this section gets the chunk from the string based on start and end parameters provided by the struct
     for(int u = startingp; u<endingp; u++){
         mainstring.push_back(binarystring.at(u));
-  }
-    
+    }
+    //this section compresses the files
     for(int r = 0; r<mainstring.length(); r++){
         if(mainstring.at(r) != lastChar) {
-            cout<<compress(lastChar, counter)<<"\n";
+            if(counter >= 16) {
+        if(lastChar == '1') {
+            string compressedVer = "+" + to_string(counter) + "+";
+            finalstring.append(compressedVer);
+        }
+        else {
+            string compressedVer = "-" + to_string(counter) + "-";
+            finalstring.append(compressedVer);
+        }
+    }
+   else {
+       string tempstring = "";
+        for(int i = 0; i < counter; i++) {
+            tempstring.push_back(lastChar);
+        }
+        finalstring.append(tempstring);
+    }
             counter = 0;
 
         }
@@ -74,9 +66,9 @@ void * reader(void *arg){
         lastChar = mainstring.at(r);
     }
 
-
-    char * usr = (char*)malloc(100 * sizeof(mainstring));
-    strcpy(usr, mainstring.c_str());
+    //this will convert a string into a char in order to return it back to the main for thread_join.
+    char * usr = (char*)malloc(100 * sizeof(finalstring));
+    strcpy(usr, finalstring.c_str());
 
     return usr;
 }
@@ -86,7 +78,7 @@ int main(int argc, char *argv[]) {
     ifstream infile;
     string fileOutput;
     ofstream outfile;
-
+    //this part reads the in and outfile
     if(argc > 2) {
         infile.open(argv[1]);
         outfile.open(argv[2]);
@@ -102,16 +94,19 @@ int main(int argc, char *argv[]) {
     }
 
     char c = ' ';
-    int n = 4;
+    int n = 3;
     int saver = 0;
     vector<int> binaryindex;
-
+    //this while loop will take the binary string from the file into a string
     while(!infile.eof()) {
         infile.get(c);
         binarystring.push_back(c);
     }
+    //the splitter will calculate how long each chunk will be
+    //the finalnum will make sure to get the correct number at the final n chunk. This helps if the string is of odd number.
     int splitter = int(binarystring.length()/n);
     int finalnum = binarystring.length() - splitter * (n - 1);
+    //this is where the start and ending index of each N chunks will be found.
     for(int k = 0 ; k<n; k++){
         if(k == 0){
             binaryindex.push_back(k * splitter);
@@ -131,6 +126,8 @@ int main(int argc, char *argv[]) {
     int savecounter = 0;
     vector<struct boundary> boundlist;
     void *result;
+
+    //a struct is called and the ints are created in order to store the start and ending index of each N chunk. This will be stored in a list.
     for(int v = 0; v<n; v++){
         struct boundary boundaries;
         savecounter = v * 2;
@@ -138,15 +135,16 @@ int main(int argc, char *argv[]) {
         boundaries.end = binaryindex[savecounter + 1];
         boundlist.push_back(boundaries);
     }
-
+    //this forloop will create a N threads in order to execute the compressor
     for(int d = 0; d<boundlist.size();d++){
-        pthread_create(&thread_id[d], NULL, reader, &boundlist[d]);
+        pthread_create(&thread_id[d], NULL, compressor, &boundlist[d]);
     }
 
     char * temp = NULL;
-
+    //this for loop will make sure that each thread is done and is printed out toward the output file in order.
     for(int r = 0; r<n; r++){
         pthread_join(thread_id[r], (void**)&temp);
+        outfile<<temp;
     }
     return 0;
 }
