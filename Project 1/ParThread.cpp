@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -12,8 +13,12 @@
 #include <vector>
 #include <pthread.h>
 #include <stdlib.h>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
+
+auto start = high_resolution_clock::now();
 //Global string is created which will allow access to all functions.
 string binarystring = "";
 //A struct is used in order to pass 2 integers into the thread argument;
@@ -67,7 +72,7 @@ void * compressor(void *arg){
     }
 
     //this will convert a string into a char in order to return it back to the main for thread_join.
-    char * usr = (char*)malloc(100 * sizeof(finalstring));
+    char * usr = (char*)malloc(5000 * sizeof(finalstring));
     strcpy(usr, finalstring.c_str());
 
     return usr;
@@ -94,7 +99,7 @@ int main(int argc, char *argv[]) {
     }
 
     char c = ' ';
-    int n = 3;
+    int n = 100;
     int saver = 0;
     vector<int> binaryindex;
     //this while loop will take the binary string from the file into a string
@@ -146,5 +151,11 @@ int main(int argc, char *argv[]) {
         pthread_join(thread_id[r], (void**)&temp);
         outfile<<temp;
     }
+
+    infile.close();
+    outfile.close();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop-start);
+    cout<<duration.count()<<endl;
     return 0;
 }

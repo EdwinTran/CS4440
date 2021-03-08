@@ -15,3 +15,9 @@ File #7	MoreShell.cpp:Created a shell like program similar to MiniShell but accp
 File #8	DupShell.cpp:Added to MoreShell program and gave MoreShell the ability to run commands connected by pipes such as ls -l | wc.
 
 File #9	ParThread.cpp:ParThread can split an input file in N number of chunks evenly and make N number of threads to compress the file. The files are then compressed individually and put together in order on to an output file.
+
+
+
+---------- 8MB test -----------
+MyCompress: .325451 seconds
+ParThread: .143964 seconds
