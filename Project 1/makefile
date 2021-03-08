@@ -1,10 +1,10 @@
-all: MyCompress.cpp MyDecompress.cpp ForCompress.cpp PipeCompress.cpp ParFork.cpp MiniShell.cpp MoreShell.cpp DupShell.cpp ParThread.cpp
-g++ -o MyCompress MyCompress.cpp
-g++ -o MyDecompress MyDecompress.cpp
-g++ -o ForkCompress ForCompress.cpp
-g++ -o PipeCompress PipeCompress.cpp
-g++ -o ParFork ParFork.cpp
-g++ -o MiniShell MiniShell.cpp
-g++ -o MoreShell MoreShell.cpp
-g++ -o DupShell DupShell.cpp
-g++ -o ParThread ParThread.cpp -lpthread
+all: MyCompress.cpp MyDecompress.cpp ForkCompress.cpp PipeCompress.cpp ParFork.cpp MinShell.cpp MoreShell.cpp DupShell.cpp ParThread.cpp
+	g++ MyCompress.cpp -o MyCompress
+	g++ MyDecompress.cpp -o MyDecompress
+	g++ ForkCompress.cpp -o ForkCompress
+	g++ PipeCompress.cpp -o PipeCompress
+	g++ ParFork.cpp -o ParFork
+	g++ MinShell.cpp -o MiniShell
+	g++ MoreShell.cpp -o MoreShell
+	g++ DupShell.cpp -o DupShell
+	g++ -o ParThread ParThread.cpp -lpthread
