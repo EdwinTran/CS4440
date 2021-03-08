@@ -1,3 +1,9 @@
+/*
+    Takes in a file of 0s and 1s which compresses it. The process is divided between the parent
+    and the child process. The parent process will read from the file and write it into a pipe
+    while the child process will read from the pipe, compress it, and write it into the file.
+*/
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -8,8 +14,15 @@
 
 using namespace std;
 
+// Compresses the string and outputs the string to the output file.
 void compress(ofstream& outfile,char lastChar, int counter) {
+    // Checks whether counter is greater than 16
+    // If greater than 16 then it will print out the compressed version
+    // else if it isn't then it will print out the respective number 'counter' number of times.
     if(counter >= 16) {
+        // Checks if it is a row of 1s or 0s.
+        // Will print out '+' on either side of the number 'counter' if 1s.
+        // Else it will print out '-' on either side along with 'counter in the middle.
         if(lastChar == '1') {
             string compressedVer = "+" + to_string(counter) + "+";
             outfile << compressedVer;
@@ -33,12 +46,15 @@ int main(int argc, char *argv[]) {
     if(pipe(p) == -1) {
         printf("Failed to create the pipe. \n");
     }
-
+    
+    // Creates a child process from the parent
     pid = fork();
 
     if(pid < 0) {
         printf("Error \n");
     }
+    // The child process reads from the pipe and compresses the file.
+    // It is the written to the output file.
     else if(pid == 0){
         printf("Child Process: STARTED\n");
         
@@ -65,6 +81,8 @@ int main(int argc, char *argv[]) {
         fileOutput.close();
         printf("Child process: DONE \n");
     }
+    // The parent process reads from the file and writes it into the pipe
+    // for the child to compress and write into the output file.
     else {
         printf("Parent process: STARTED\n");
         string str = "";
