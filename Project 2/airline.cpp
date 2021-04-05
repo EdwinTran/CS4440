@@ -36,7 +36,7 @@ void* B(void* counter) {
             bagPas++;
 
             pthread_mutex_unlock(&lock);
-            usleep(100);
+            usleep(5000);
             sem_post(&secSema);
             sem_post(&bagAvail);
         }
@@ -59,7 +59,7 @@ void* S(void* counter) {
             
             secPas++;
             pthread_mutex_unlock(&lock);
-            usleep(100);
+            usleep(5000);
             sem_post(&fliSema);
             sem_post(&secAvail);
         }
@@ -81,8 +81,8 @@ void* F(void* counter) {
             cout << "Passenger #" << fliPas << " is waiting to be seated by an attendant.\n\n";
 
             fliPas++;
+            usleep(5000);
             pthread_mutex_unlock(&lock);
-            usleep(100);
             sem_post(&pasSema);
             sem_post(&fliAvail);
         }
@@ -103,7 +103,7 @@ void* P(void* counter) {
 
             pasPas++;
             pthread_mutex_unlock(&lock);
-            usleep(100);
+            usleep(5000);
             sem_post(&pasAvail);
         }
     }
