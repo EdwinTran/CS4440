@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
     int sock, port;
     struct hostent *host;
     struct sockaddr_in hint;
+    string commands;
 
     if(argc < 3) {
         fprintf(stderr, "ERROR not enough arguments\n");
@@ -42,11 +43,18 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "ERROR cannot connect\n");
         exit(0);
     }
+
+    commands = "\n[I]nfo\t-Gets Disk Geometry\n";
+    commands += "[R]ead\t-Read from disk 'R [Cylinders] [Sectors]\n";
+    commands += "[W]rite\t-Writes to disk 'W [Cylinders] [Sectors]\n";
+    commands += "[E]xit\t -Exits the program\n\n";
+
+    cout << commands;
     
     char buf[4096];
     string userInput;
 
-    while(userInput != "EXIT") {
+    while(userInput != "E") {
         cout << "> ";
         getline(cin, userInput);
 
@@ -66,6 +74,8 @@ int main(int argc, char* argv[]) {
             cout << "SERVER> " << string(buf, bytesReceived) << "\n";
         }
     }
+
+    cout << "DISCONNECTED FROM SERVER\n\n";
     
     close(sock);
     return 0;

@@ -1,4 +1,9 @@
+#include <sys/mman.h>
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -8,10 +13,6 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <fstream>
-
 
 using namespace std;
 
@@ -31,6 +32,10 @@ void handleConnection(void **servSock) {
     int clientSocket;
     char buffer[4096];
 
+    if(fstat(fd, &sb) == -1) {
+        perror("CANNOT GET FILE SIZE\n");
+    }
+
     socklen_t clientAddrLen = sizeof(clientAddr);
     clientSocket = accept(sock, (struct sockaddr*)&clientAddr, &clientAddrLen);
 
@@ -39,29 +44,73 @@ void handleConnection(void **servSock) {
     }
 
     while(true) {
-        memset(buffer, 0, 4096);
+        //RESET THE INPUTED CYLINDERS AND SECTORS TO 0
+        int userCylin = 0, userSec = 0;
+        char choice;
+        string updatedStr;
+        char retBuf[129];
 
         bytesReceived = recv(clientSocket, buffer, 4096, 0);
 
+        string bufStr(buffer);
+        istringstream split(bufStr);
+
+        split >> choice >> userCylin >> userSec;
+        getline(split, updatedStr);
+
         int stringLen = sizeof(string(buffer, 0, bytesReceived));
+        int n = bytesReceived;
 
         cout << "Received: " << string(buffer, 0, bytesReceived) << "\n";
 
-        int n = bytesReceived;
-
-        if(toupper(buffer[0]) == 'I') {
+        if(toupper(choice) == 'I') {
             memset(buffer, 0, 4096);
             string s = to_string(cylinders) + " " + to_string(sectors);
-            strcpy(buffer, s.c_str());
+            strcpy(retBuf, s.c_str());
         }
-        else if(toupper(buffer[0] == 'R')) {
-            memset(buffer, 0, 4096);
-            char *p = mmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, , 0);
+        else if(toupper(choice) == 'R') {
+            if((userCylin > 0 && userCylin <= cylinders) && (userSec > 0 && userSec <= sectors)) {
+                //GET CYLINDERS AND SECTORS FROM READING FROM CLIENT
+                struct dataBlock *p = (dataBlock *)mmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+                if(p == MAP_FAILED) {
+                    fprintf(stderr, "ERROR MAPPING FAILED\n");
+                    std::exit(0);
+                }
+
+                memcpy(retBuf + 1, p[(userCylin - 1) * sectors + (userSec - 1)].data, 128);
+                retBuf[0] = '1';
+            }
+            else {
+                retBuf[0] = '0';
+            }
+        }
+        else if(toupper(choice) == 'W') {
+            if((userCylin > 0 && userCylin <= cylinders) && (userSec > 0 && userSec <= sectors)) {
+                struct dataBlock *p = (dataBlock *)mmap(0, sb.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+                if(p == MAP_FAILED) {
+                    fprintf(stderr, "ERROR MAPPING FAILED\n");
+                    std::exit(0);
+                }
+
+
+                memcpy(p[(userCylin - 1) * sectors + (userSec - 1)].data, updatedStr.c_str(), updatedStr.length());
+                retBuf[0] = '1';
+            }
+            else {
+                retBuf[0] = '0';
+            }
+        }
+        else if(toupper(choice) == 'E') {
+            close(clientSocket);
+            break;
         }
 
-        send(clientSocket, buffer, 4096, 0);
+        send(clientSocket, retBuf, 129, 0);
+        memset(retBuf, 0, 129);
+        memset(buffer, 0, 4096);
     }
-    close(clientSocket);
 }
 
 int main(int argc, char* argv[]) {
@@ -72,7 +121,7 @@ int main(int argc, char* argv[]) {
 
     if(argc != 5) {
         fprintf(stderr, "ERROR please enter a port #, # of cylinder, # of sectors per cylinder, file name\n");
-        exit(0);
+        std::exit(0);
     }
 
     port = atoi(argv[1]);
@@ -80,13 +129,13 @@ int main(int argc, char* argv[]) {
     sectors = atoi(argv[3]);
     fileName = argv[4];
 
-    fd = open(fileName);
+    fd = open(fileName, O_RDWR);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     if(sock == -1) {
         fprintf(stderr, "ERROR cannot create socket\n");
-        exit(0);
+        std::exit(0);
     }
 
     hint.sin_family = AF_INET;
@@ -95,11 +144,10 @@ int main(int argc, char* argv[]) {
 
     if(bind(sock, (struct sockaddr*)&hint, sizeof(hint)) == -1) {
         fprintf(stderr, "ERROR cannot bind\n");
-        exit(0);
+        std::exit(0);
     }
 
     listen(sock, 5);
-
 
     while(true) {
         

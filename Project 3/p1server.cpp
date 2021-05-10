@@ -11,7 +11,7 @@
 using namespace std;
 
 int bytesReceived = 0;
-
+    
 void handleConnection(void **servSock) {
     int sock = *((int*)servSock);
     struct sockaddr_in clientAddr;
